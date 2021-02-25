@@ -1,5 +1,4 @@
 <?php
-use Illuminate\Support\Facades\Cache;
 /** @var \Laravel\Lumen\Routing\Router $router */
 
 /*
@@ -14,8 +13,14 @@ use Illuminate\Support\Facades\Cache;
 */
 
 $router->get('/', function () use ($router) {
-  Cache::flush();
     return $router->app->version();
 });
-$router->get('/key', function() {
+$router->group(['prefix' => 'api'], function () use ($router) {
+  $router->post('login', 'Api\UserController@login');
+  $router->post('register', 'Api\UserController@register');
+
+  $router->group(['middleware' => 'auth:api'], function () use ($router) {
+    $router->get('user', 'Api\UserController@details');
+    $router->post('logout', 'Api\UserController@logout');
+  });
 });

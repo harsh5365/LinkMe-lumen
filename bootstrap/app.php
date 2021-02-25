@@ -1,9 +1,9 @@
 <?php
 
 require_once __DIR__.'/../vendor/autoload.php';
-$app = new \Dusterio\LumenPassport\Lumen7Application(
+/* $app = new \Dusterio\LumenPassport\Lumen7Application(
     dirname(__DIR__)
-);
+); */
 
 (new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
     dirname(__DIR__)
@@ -26,8 +26,8 @@ $app = new Laravel\Lumen\Application(
     dirname(__DIR__)
 );
 
-$app->withFacades();
 $app->register(Jenssegers\Mongodb\MongodbServiceProvider::class);
+$app->withFacades();
 $app->withEloquent();
 
 /*
@@ -63,6 +63,7 @@ $app->singleton(
 */
 
 $app->configure('app');
+$app->configure('auth');
 
 /*
 |--------------------------------------------------------------------------
@@ -94,7 +95,7 @@ $app->routeMiddleware([
 |
 */
 
-// $app->register(App\Providers\AppServiceProvider::class);
+$app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 $app->register(Laravel\Passport\PassportServiceProvider::class);
@@ -110,6 +111,8 @@ $app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
 | can respond to, as well as the controllers that may handle them.
 |
 */
+\Dusterio\LumenPassport\LumenPassport::routes($app->router);
+// public function boot() { LumenPassport::routes($app->router); }
 
 $app->router->group([
     'namespace' => 'App\Http\Controllers',
