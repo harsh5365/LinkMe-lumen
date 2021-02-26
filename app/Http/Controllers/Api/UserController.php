@@ -83,9 +83,11 @@ class UserController extends Controller
 
     public function logout(Request $request)
     {
-        $accessToken = User::findOrFail($request->id);
-        // $user = $accessToken->token();
-        // $user->revoke();
-        return response()->json(null, 204);
+        if (Auth::check()) {
+            Auth::user()->token()->revoke();
+            return response()->json(['success' =>'logout_success'],200);
+        }else{
+            return response()->json(['error' =>'api.something_went_wrong'], 500);
+        }
     }
 }
