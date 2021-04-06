@@ -93,7 +93,7 @@ return [
 
         'mongodb' => [
             'driver' => 'mongodb',
-            'dsn'=>'mongodb+srv://'.env('MONGO_DB_USERNAME', '').':'.env('MONGO_DB_PASSWORD', '').'@'.env('MONGO_HOSTS', '127.0.0.1').'/'.env('MONGO_DB_DATABASE', 'LinkMe').'?retryWrites=true&w=majority',
+            'dsn'=>'mongodb'.((env('CONNECT_MODE', 'live') == 'live')? '+srv' : '').'://'.env('MONGO_DB_USERNAME', '').':'.env('MONGO_DB_PASSWORD', '').'@'.env('MONGO_HOSTS', '127.0.0.1').'/'.env('MONGO_DB_DATABASE', 'LinkMe').'?retryWrites=true&w=majority',
         ],
 
     ],

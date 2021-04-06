@@ -20,6 +20,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
   $router->post('register', 'Api\UserController@register');
 
   $router->group(['middleware' => 'auth:api'], function () use ($router) {
+    $router->post('change_password', 'Api\UserController@changePassword');
     $router->get('user', 'Api\UserController@details');
     $router->post('logout', 'Api\UserController@logout');
   });
