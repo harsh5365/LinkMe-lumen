@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Traits\ResetsPasswords;
+use App\Traits\SendsPasswordResetEmails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -11,6 +13,12 @@ use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
+    use SendsPasswordResetEmails, ResetsPasswords;
+    public function __construct()
+    {
+        $this->broker = 'users';
+    }
+
     /**
      * Handles Registration Request
      *

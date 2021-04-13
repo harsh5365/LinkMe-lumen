@@ -16,8 +16,10 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 $router->group(['prefix' => 'api'], function () use ($router) {
-  $router->post('login', 'Api\UserController@login');
-  $router->post('register', 'Api\UserController@register');
+    $router->post('login', 'Api\UserController@login');
+    $router->post('register', 'Api\UserController@register');
+    $router->post('/password/reset-request', 'Api\UserController@sendResetLinkEmail');
+    $router->post('/password/reset', [ 'as' => 'password.reset', 'uses' => 'Api\UserController@reset' ]);
 
   $router->group(['middleware' => 'auth:api'], function () use ($router) {
     $router->post('change_password', 'Api\UserController@changePassword');
