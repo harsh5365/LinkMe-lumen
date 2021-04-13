@@ -54,7 +54,7 @@ return [
     |
     */
 
-    'from' => ['address' => 'support@linkme.com', 'name' => 'LinkMe'],
+    'from' => ['address' => 'noreply@welovecoders.com', 'name' => 'LinkMe'],
 
     /*
     |--------------------------------------------------------------------------
