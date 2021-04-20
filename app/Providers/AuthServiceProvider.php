@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Auth\Notifications\ResetPassword;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -34,6 +35,10 @@ class AuthServiceProvider extends ServiceProvider
             if ($request->input('api_token')) {
                 return User::where('api_token', $request->input('api_token'))->first();
             }
+        });
+
+        ResetPassword::createUrlUsing(function ($user, string $token) {
+            return env('FRONT_END_LINK', 'http://localhost:3000').'reset-password?token='.$token.'&email='.$user->email;
         });
     }
 }
