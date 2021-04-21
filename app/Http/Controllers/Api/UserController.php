@@ -3,13 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Libraries\CommonFunction;
 use App\Models\User;
+use App\Notifications\CommonNotification;
 use App\Traits\ResetsPasswords;
 use App\Traits\SendsPasswordResetEmails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -39,12 +43,24 @@ class UserController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password)
+            'password' => Hash::make($request->password),
+            'active'   => 0,
+            'verify_account' => Str::random(10),
         ]);
 
-        $token = $user->createToken('LinkMe')->accessToken;
+        // $token = $user->createToken('LinkMe')->accessToken;
 
-        return response()->json(['token' => $token], 200);
+        $notify = [
+            'email_subject'     => 'Account Activation',
+            'introduction_line' => "Thank you for registering on ". env('APP_NAME') .'.',
+            'email_text'        => 'You need to activate your account in order to use our service. please click link we sent on your email address.',
+            'action_text'       => 'Activate Your Account',
+            'action_url'        => env('FRONT_END_LINK') . 'verifyAccount?email=' . $user->email . '&verify_token=' . $user->verify_account,
+            'email_blade'       => 'mail.default'
+        ];
+        Notification::send($user, new CommonNotification($notify));
+        // return response()->json(['token' => $token], 200);
+        return response()->json(['message' => 'Activate your Account using activation link.'], 200);
     }
 
     /**
@@ -65,10 +81,13 @@ class UserController extends Controller
         }
         $user = User::where('email', $request->email)->first();
         if ($user) {
-            if (Hash::check($request->password, $user->password)) {
+            if (Hash::check($request->password, $user->password) && isset($user->active) && !empty($user->active)) {
                 $token = $user->createToken(env('APP_NAME'))->accessToken;
                 $response = ['token' => $token];
                 return response($response, 200);
+            } else if(!isset($user->active) || empty($user->active)){
+                $response = ["message" => "Your Account is Not Active Yet."];
+                return response($response, 422);
             } else {
                 $response = ["message" => "Password mismatch"];
                 return response($response, 422);
@@ -121,5 +140,16 @@ class UserController extends Controller
             }
         }
         return $arr;
+    }
+
+    public function verifyAccount(Request $request){
+        $user = User::where('email', $request->email)->first();
+        $data = $user->toArray();
+        if($user->verify_account == $request->verify_account){
+            $user->unset('verify_account');
+            $user->active = 1;
+            $user->save();
+        }
+        return response()->json(['message' =>'Account Activated Successfully.'],200);
     }
 }
