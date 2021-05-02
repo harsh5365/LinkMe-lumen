@@ -50,15 +50,7 @@ class UserController extends Controller
 
         // $token = $user->createToken('LinkMe')->accessToken;
 
-        $notify = [
-            'email_subject'     => 'Account Activation',
-            'introduction_line' => "Thank you for registering on ". env('APP_NAME') .'.',
-            'email_text'        => 'You need to activate your account in order to use our service. please click link we sent on your email address.',
-            'action_text'       => 'Activate Your Account',
-            'action_url'        => env('FRONT_END_LINK') . 'verifyAccount?email=' . $user->email . '&verify_token=' . $user->verify_account,
-            'email_blade'       => 'mail.default'
-        ];
-        Notification::send($user, new CommonNotification($notify));
+        $this->sendVerifyEmail($user);
         // return response()->json(['token' => $token], 200);
         return response()->json(['message' => 'Activate your Account using activation link.'], 200);
     }
@@ -144,12 +136,40 @@ class UserController extends Controller
 
     public function verifyAccount(Request $request){
         $user = User::where('email', $request->email)->first();
-        $data = $user->toArray();
-        if($user->verify_account == $request->verify_account){
-            $user->unset('verify_account');
-            $user->active = 1;
-            $user->save();
+        if(!empty($user)){
+            if($user->verify_account == $request->verify_account){
+                $user->unset('verify_account');
+                $user->active = 1;
+                $user->save();
+                return response()->json(['message' =>'Account Activated Successfully.', 'activation_status'=> $user->active],200);
+            }else{
+                return response()->json(['message' =>'Code mismatch please try again.', 'activation_status'=> $user->active],200);
+            }
+        }else{
+            return response()->json(['message' =>'No user found.'],200);
         }
-        return response()->json(['message' =>'Account Activated Successfully.'],200);
+    }
+
+    public function resendVerifyEmail(Request $request){
+        $user = User::where('email', $request->email)->where('active', 0)->first();
+        if(!empty($user)){
+            $this->sendVerifyEmail($user);
+            return response()->json(['message' =>'Mail has been sent.'],200);
+        }else{
+            return response()->json(['message' =>'No user found.'],200);
+        }
+    }
+
+    public function sendVerifyEmail(object $user){
+        $notify = [
+            'email_subject'     => 'Account Activation',
+            'introduction_line' => "Thank you for registering on ". env('APP_NAME') .'.',
+            'email_text'        => 'You need to activate your account in order to use our service. please click link we sent on your email address.',
+            'action_text'       => 'Activate Your Account',
+            'action_url'        => env('FRONT_END_LINK') . 'verifyAccount?email=' . $user->email . '&verify_token=' . $user->verify_account,
+            'email_blade'       => 'mail.default'
+        ];
+        Notification::send($user, new CommonNotification($notify));
+        return true;
     }
 }
