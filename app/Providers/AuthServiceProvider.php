@@ -38,7 +38,7 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         ResetPassword::createUrlUsing(function ($user, string $token) {
-            return env('FRONT_END_LINK', 'http://localhost:3000/').'reset-password?token='.$token.'&email='.$user->email;
+            return env('FRONT_END_LINK', 'http://localhost:3100/').'user/reset_password?token='.$token.'&email='.$user->email;
         });
     }
 }

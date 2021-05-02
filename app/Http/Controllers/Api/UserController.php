@@ -166,7 +166,7 @@ class UserController extends Controller
             'introduction_line' => "Thank you for registering on ". env('APP_NAME') .'.',
             'email_text'        => 'You need to activate your account in order to use our service. please click link we sent on your email address.',
             'action_text'       => 'Activate Your Account',
-            'action_url'        => env('FRONT_END_LINK') . 'verifyAccount?email=' . $user->email . '&verify_token=' . $user->verify_account,
+            'action_url'        => env('FRONT_END_LINK', 'http://localhost:3100/') . 'user/verify_account?email=' . $user->email . '&verify_token=' . $user->verify_account,
             'email_blade'       => 'mail.default'
         ];
         Notification::send($user, new CommonNotification($notify));
