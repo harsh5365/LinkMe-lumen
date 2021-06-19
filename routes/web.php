@@ -27,5 +27,8 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->post('change_password', 'Api\UserController@changePassword');
     $router->get('user', 'Api\UserController@details');
     $router->post('logout', 'Api\UserController@logout');
+
+    // setup user
+    $router->post('setup_user', 'Api\UserController@setupUser');
   });
 });

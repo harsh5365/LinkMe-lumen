@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Libraries\CommonFunction;
 use App\Models\User;
 use App\Notifications\CommonNotification;
 use App\Traits\ResetsPasswords;
@@ -32,9 +31,11 @@ class UserController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->input(), [
-            'name' => 'required|min:3',
+            'username' => 'required|min:3|unique:users',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6',
+            'first_login' => 1,
+            'user_type_id' => 2 // normal users
         ]);
         if ($validator->fails())
         {
@@ -75,7 +76,8 @@ class UserController extends Controller
         if ($user) {
             if (Hash::check($request->password, $user->password) && isset($user->active) && !empty($user->active)) {
                 $token = $user->createToken(env('APP_NAME'))->accessToken;
-                $response = ['token' => $token];
+                $first_login = (isset($user->first_login))? $user->first_login : 0;
+                $response = ['token' => $token, 'first_login' => $first_login];
                 return response($response, 200);
             } else if(!isset($user->active) || empty($user->active)){
                 $response = ["message" => "Your Account is Not Active Yet."];
@@ -171,5 +173,30 @@ class UserController extends Controller
         ];
         Notification::send($user, new CommonNotification($notify));
         return true;
+    }
+
+    public function setupUser(Request $request){
+        $input = $request->input();
+        $rules = array(
+            'name' => 'required|min:3',
+        );
+        $update = User::find(auth()->user()->id);
+        $arr =[];
+        if($request->step == 1){
+            $validator = Validator::make($input, $rules);
+            if ($validator->fails()) {
+                $arr = array("status" => 400, "message" => $validator->errors()->first());
+            }else{
+                $update->name = $request->name;
+                $update->save();
+                $arr = array("status" => 200, "message" => 'name Saved', "completed_step" => 1);
+            }
+        }else if($request->step == 2){
+            $update->categories = $request->categories;
+            $update->first_login = 0;
+            $update->save();
+            $arr = array("status" => 200, "message" => 'name Saved', "completed_step" => 2);
+        }
+        return json_encode($arr);
     }
 }
