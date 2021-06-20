@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\User;
 use App\Notifications\CommonNotification;
 use App\Traits\ResetsPasswords;
@@ -77,7 +78,8 @@ class UserController extends Controller
             if (Hash::check($request->password, $user->password) && isset($user->active) && !empty($user->active)) {
                 $token = $user->createToken(env('APP_NAME'))->accessToken;
                 $first_login = (isset($user->first_login))? $user->first_login : 0;
-                $response = ['token' => $token, 'first_login' => $first_login];
+                $categories = Category::where('deleted', 0)->get();
+                $response = ['token' => $token, 'first_login' => $first_login, 'categories' => $categories];
                 return response($response, 200);
             } else if(!isset($user->active) || empty($user->active)){
                 $response = ["message" => "Your Account is Not Active Yet."];
@@ -182,20 +184,15 @@ class UserController extends Controller
         );
         $update = User::find(auth()->user()->id);
         $arr =[];
-        if($request->step == 1){
-            $validator = Validator::make($input, $rules);
-            if ($validator->fails()) {
-                $arr = array("status" => 400, "message" => $validator->errors()->first());
-            }else{
-                $update->name = $request->name;
-                $update->save();
-                $arr = array("status" => 200, "message" => 'name Saved', "completed_step" => 1);
-            }
-        }else if($request->step == 2){
+        $validator = Validator::make($input, $rules);
+        if ($validator->fails()) {
+            $arr = array("status" => 400, "message" => $validator->errors()->first());
+        }else{
+            $update->name = $request->name;
             $update->categories = $request->categories;
             $update->first_login = 0;
             $update->save();
-            $arr = array("status" => 200, "message" => 'name Saved', "completed_step" => 2);
+            $arr = array("status" => 200, "message" => 'information Saved');
         }
         return json_encode($arr);
     }
