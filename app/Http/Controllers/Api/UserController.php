@@ -78,8 +78,7 @@ class UserController extends Controller
             if (Hash::check($request->password, $user->password) && isset($user->active) && !empty($user->active)) {
                 $token = $user->createToken(env('APP_NAME'))->accessToken;
                 $first_login = (isset($user->first_login))? $user->first_login : 0;
-                $categories = Category::get();
-                $response = ['token' => $token, 'first_login' => $first_login, 'categories' => $categories];
+                $response = ['token' => $token, 'first_login' => $first_login];
                 return response($response, 200);
             } else if(!isset($user->active) || empty($user->active)){
                 $response = ["message" => "Your Account is Not Active Yet."];
@@ -195,5 +194,10 @@ class UserController extends Controller
             $arr = array("status" => 200, "message" => 'information Saved');
         }
         return json_encode($arr);
+    }
+
+    public function getCategories(Request $request){
+        $categories = Category::get();
+        return json_encode(['status' => 200, 'categories' => $categories]);
     }
 }

@@ -30,5 +30,6 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
     // setup user
     $router->post('setup_user', 'Api\UserController@setupUser');
+    $router->get('getCategories', 'Api\UserController@getCategories');
   });
 });
