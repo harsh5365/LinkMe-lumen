@@ -78,7 +78,7 @@ class UserController extends Controller
             if (Hash::check($request->password, $user->password) && isset($user->active) && !empty($user->active)) {
                 $token = $user->createToken(env('APP_NAME'))->accessToken;
                 $first_login = (isset($user->first_login))? $user->first_login : 0;
-                $categories = Category::where('deleted', 0)->get();
+                $categories = Category::get();
                 $response = ['token' => $token, 'first_login' => $first_login, 'categories' => $categories];
                 return response($response, 200);
             } else if(!isset($user->active) || empty($user->active)){
