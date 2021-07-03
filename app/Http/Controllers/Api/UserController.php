@@ -34,15 +34,22 @@ class UserController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->input(), [
-            'username' => 'required|min:3|unique:users',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-            'first_login' => 1,
-            'user_type_id' => 2 // normal users
+            'username' => 'required|min:3',
+            'email' => 'required|email',
+            'password' => 'required|min:6'
         ]);
         if ($validator->fails())
         {
             return response(['errors'=>$validator->errors()->all()], 422);
+        }
+        $check_existing = User::where('email', $request->email)->orWhere('username', $request->username)->first();
+        if(!empty($check_existing)){
+            $msg = '';
+            if($check_existing->username == $request->username)
+                $msg = 'username already exists';
+            if($check_existing->email == $request->email)
+                $msg = 'email already exists';
+            return response()->json(['status' => 200, 'message' => $msg]);
         }
         $user = User::create([
             'name' => $request->name,
@@ -50,6 +57,8 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
             'active'   => 0,
             'verify_account' => Str::random(10),
+            'first_login' => 1,
+            'user_type_id' => 2 // normal users
         ]);
 
         // $token = $user->createToken('LinkMe')->accessToken;
