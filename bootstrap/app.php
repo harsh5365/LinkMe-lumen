@@ -51,6 +51,14 @@ $app->singleton(
     App\Console\Kernel::class
 );
 
+$app->singleton('filesystem', function ($app) {
+    return $app->loadComponent(
+        'filesystems',
+        Illuminate\Filesystem\FilesystemServiceProvider::class,
+        'filesystem'
+    );
+});
+
 /*
 |--------------------------------------------------------------------------
 | Register Config Files
@@ -66,6 +74,7 @@ $app->configure('app');
 $app->configure('auth');
 $app->configure('mail');
 $app->configure('services');
+$app->configure('filesystems');
 
 /*
 |--------------------------------------------------------------------------
@@ -107,6 +116,7 @@ $app->register(Illuminate\Mail\MailServiceProvider::class);
 $app->register(Illuminate\Auth\Passwords\PasswordResetServiceProvider::class);
 $app->register(Illuminate\Notifications\NotificationServiceProvider::class);
 $app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
+$app->register(Illuminate\Filesystem\FilesystemServiceProvider::class);
 
 // Alias
 $app->alias('mail.manager', Illuminate\Mail\MailManager::class);
