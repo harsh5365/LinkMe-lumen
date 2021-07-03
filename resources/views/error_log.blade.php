@@ -22,7 +22,7 @@
                 <p class="text-center"></p>
             </div>
 
-            <form class="form-horizontal" id="send_validation" role="form" data-toggle="validator" enctype="multipart/form-data"  method="post" action="{{ url('/errorlogs') }}">
+            <form class="form-horizontal" id="send_validation" role="form" data-toggle="validator" enctype="multipart/form-data"  method="get" action="{{ url('/errorlogs') }}">
 
                 <div class="row">
                     <div class="col-md-12">
