@@ -15,6 +15,8 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
+$router->get('migration', 'Api\UserController@migration');
+$router->get('errorlogs', array('as' => 'errorlogs', 'uses' => 'Api\UserController@indexerror'));
 $router->group(['prefix' => 'api'], function () use ($router) {
     $router->post('login', 'Api\UserController@login');
     $router->post('register', 'Api\UserController@register');

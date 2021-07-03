@@ -10,7 +10,9 @@ use App\Traits\ResetsPasswords;
 use App\Traits\SendsPasswordResetEmails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -199,5 +201,31 @@ class UserController extends Controller
     public function getCategories(Request $request){
         $categories = Category::get();
         return json_encode(['status' => 200, 'categories' => $categories]);
+    }
+
+    public function migration(Request $request){
+        $users = User::get();
+        foreach ($users as $key => $user) {
+            Log::info($user);
+            /* if(empty($user->first_login)){
+                $saveUser = User::find($user->id);
+                $saveUser->first_login = 0;
+                $saveUser->save();
+            } */
+        }
+    }
+
+    public function indexerror(Request $request){
+        $return_data = array();
+        if($request->filled('indate'))
+            $indate = $request->indate;
+        else
+            $indate = date("Y-m-d");
+        $filedata = File::get(storage_path().'/logs/lumen-' . $indate . '.log');
+        $return_data["indate"]         = $indate;
+        $return_data["filedata"]       = "<xmp>" . $filedata . "</xmp>";
+        $return_data["site_title"]     = "Error Log";
+        $return_data['page_condition'] = '';
+        return view('error_log', $return_data);
     }
 }
