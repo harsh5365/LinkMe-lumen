@@ -151,7 +151,7 @@ class UserController extends Controller
     public function verifyAccount(Request $request){
         $user = User::where('email', $request->email)->first();
         if(!empty($user)){
-            if($user->verify_account == $request->verify_account){
+            if($user->verify_account == $request->verify_token){
                 $user->unset('verify_account');
                 $user->active = 1;
                 $user->save();
@@ -225,6 +225,7 @@ class UserController extends Controller
     }
 
     public function indexerror(Request $request){
+        dd(config('mail'));
         $return_data = array();
         if($request->filled('indate'))
             $indate = $request->indate;
