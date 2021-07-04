@@ -33,6 +33,7 @@ class UserController extends Controller
      */
     public function register(Request $request)
     {
+        $email = strtolower($request->email);
         $validator = Validator::make($request->input(), [
             'username' => 'required|min:3',
             'email' => 'required|email',
@@ -42,18 +43,18 @@ class UserController extends Controller
         {
             return response(['errors'=>$validator->errors()->all()], 422);
         }
-        $check_existing = User::where('email', $request->email)->orWhere('username', $request->username)->first();
+        $check_existing = User::where('email', $email)->orWhere('username', $request->username)->first();
         if(!empty($check_existing)){
             $msg = '';
             if($check_existing->username == $request->username)
                 $msg = 'username already exists';
-            if($check_existing->email == $request->email)
+            if($check_existing->email == $email)
                 $msg = 'email already exists';
             return response()->json(['status' => 200, 'message' => $msg]);
         }
         $user = User::create([
             'name' => $request->name,
-            'email' => $request->email,
+            'email' => $email,
             'password' => Hash::make($request->password),
             'active'   => 0,
             'verify_account' => Str::random(10),
@@ -76,6 +77,7 @@ class UserController extends Controller
      */
     public function login(Request $request)
     {
+        $email = $request->email;
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email|max:255',
             'password' => 'required|string|min:6',
@@ -84,7 +86,7 @@ class UserController extends Controller
         {
             return response(['errors'=>$validator->errors()->all()], 422);
         }
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $email)->first();
         if ($user) {
             if (Hash::check($request->password, $user->password) && isset($user->active) && !empty($user->active)) {
                 $token = $user->createToken(env('APP_NAME'))->accessToken;
