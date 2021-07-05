@@ -53,7 +53,7 @@ class UserController extends Controller
             return response()->json(['status' => 200, 'message' => $msg]);
         }
         $user = User::create([
-            'name' => $request->name,
+            'username' => $request->username,
             'email' => $email,
             'password' => Hash::make($request->password),
             'active'   => 0,
@@ -218,16 +218,15 @@ class UserController extends Controller
         $users = User::get();
         foreach ($users as $key => $user) {
             Log::info($user);
-            /* if(empty($user->first_login)){
+            /* if(empty($user->username)){
                 $saveUser = User::find($user->id);
-                $saveUser->first_login = 0;
+                $saveUser->username = Str::random(3);
                 $saveUser->save();
             } */
         }
     }
 
     public function indexerror(Request $request){
-        dd(config('mail'));
         $return_data = array();
         if($request->filled('indate'))
             $indate = $request->indate;
