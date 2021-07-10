@@ -64,4 +64,16 @@ class LinkController extends Controller
         $delete_success = Link::where('_id', $link_id)->where('user_id', $this->user->id)->delete();
         return response(json_encode(['status' => 200, 'message' => (($delete_success)? 'link deleted successfully': 'something went wrong')]));
     }
+
+    public function SortUserLinks(Request $request){
+        $link_ids = $request->link_ids;
+        if(!empty($link_ids)){
+            foreach ($link_ids as $sort_id => $link_id) {
+                $link_sort = Link::find($link_id);
+                $link_sort->sort_order = $sort_id;
+                $link_sort->save();
+            }
+        }
+        return response()->json(['status' => 200, 'message' => 'links are sorted successfully']);
+    }
 }
