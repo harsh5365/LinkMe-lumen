@@ -59,9 +59,9 @@ class LinkController extends Controller
         return response(json_encode(['links' => $allLinks]));
     }
 
-    public function delete_link(Request $request){
+    public function deleteLink(Request $request){
         $link_id = $request->link_id;
-        $delete_success = Link::where('id', $link_id)->where('user_id', $this->user->id)->delete();
+        $delete_success = Link::where('_id', $link_id)->where('user_id', $this->user->id)->delete();
         return response(json_encode(['status' => 200, 'message' => (($delete_success)? 'link deleted successfully': 'something went wrong')]));
     }
 }

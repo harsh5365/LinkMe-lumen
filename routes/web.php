@@ -36,8 +36,8 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 		$router->get('getCategories', 'Api\UserController@getCategories');
 
 		// link saving
+        $router->get('delete_link', 'Api\LinkController@deleteLink');
 		$router->post('save_link', 'Api\LinkController@saveLink');
         $router->get('list_links', 'Api\LinkController@linkUserLinks');
-        $router->get('delete_link', 'Api\LinkController@deleteLink');
 	});
 });
