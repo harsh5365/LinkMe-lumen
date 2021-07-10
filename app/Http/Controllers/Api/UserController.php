@@ -91,7 +91,7 @@ class UserController extends Controller
             if (Hash::check($request->password, $user->password) && isset($user->active) && !empty($user->active)) {
                 $token = $user->createToken(env('APP_NAME'))->accessToken;
                 $first_login = (isset($user->first_login))? $user->first_login : 0;
-                $response = ['token' => $token, 'first_login' => $first_login];
+                $response = ['token' => $token, 'first_login' => $first_login, 'username' => $user->username];
                 return response($response, 200);
             } else if(!isset($user->active) || empty($user->active)){
                 $response = ["message" => "Your Account is Not Active Yet."];
