@@ -52,7 +52,7 @@ class LinkController extends Controller
         $username    = $request->username;
         $user        = User::where('username', $username)->first();
         if(!empty($user)){
-            $allLinks = Link::where('username', $username)
+            $allLinks = Link::where('user_id', $user->id)
             ->orderBy('sort_order')->get();
             return response(json_encode(['links' => $allLinks]));
         }else{
