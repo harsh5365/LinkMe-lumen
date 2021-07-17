@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Link;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -12,21 +13,16 @@ use League\Flysystem\Adapter\Local;
 
 class LinkController extends Controller
 {
-    protected $user;
-
-    public function __construct()
-    {
-    $this->user = auth()->user();
-    }
-
     public function saveLink(Request $request){
         // common saving code
-        $link_id = $request->link_id;
+        $link_id     = $request->link_id;
+        $username    = $request->username;
+        $user        = User::where('username', $username)->first();
         if(!empty($link_id)){
             $link_model = Link::find($link_id);
         }else{
             $link_model = new Link();
-            $link_model->user_id = $this->user->id;
+            $link_model->user_id = $user->id;
         }
 
         // save title if exist
@@ -53,16 +49,27 @@ class LinkController extends Controller
     }
 
     public function linkUserLinks(Request $request){
-        $project_url = env('APP_URL') . '/public/';
-        $allLinks = Link::where('user_id', $this->user->id)
-        ->orderBy('sort_order')->get();
-        return response(json_encode(['links' => $allLinks]));
+        $username    = $request->username;
+        $user        = User::where('username', $username)->first();
+        if(!empty($user)){
+            $allLinks = Link::where('username', $username)
+            ->orderBy('sort_order')->get();
+            return response(json_encode(['links' => $allLinks]));
+        }else{
+            return response(json_encode(['status' => 200, 'message' => 'user not found']));
+        }
     }
 
     public function deleteLink(Request $request){
-        $link_id = $request->link_id;
-        $delete_success = Link::where('_id', $link_id)->where('user_id', $this->user->id)->delete();
-        return response(json_encode(['status' => 200, 'message' => (($delete_success)? 'link deleted successfully': 'something went wrong')]));
+        $link_id     = $request->link_id;
+        $username    = $request->username;
+        $user        = User::where('username', $username)->first();
+        if(!empty($user)){
+            $delete_success = Link::where('_id', $link_id)->where('user_id', $user->id)->delete();
+            return response(json_encode(['status' => 200, 'message' => (($delete_success)? 'link deleted successfully': 'something went wrong')]));
+        }else{
+            return response(json_encode(['status' => 200, 'message' => 'user not found']));
+        }
     }
 
     public function SortUserLinks(Request $request){
