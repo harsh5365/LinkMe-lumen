@@ -15,19 +15,19 @@ class LinkController extends Controller
 {
     public function saveLink(Request $request){
         // common saving code
-        $link_id     = $request->link_id;
-        $username    = $request->username;
-        $user        = User::where('username', $username)->first();
+        $link_id                  = $request->link_id;
+        $username                 = $request->username;
+        $user                     = User::where('username', $username)->first();
         if(!empty($link_id)){
-            $link_model = Link::find($link_id);
+            $link_model           = Link::find($link_id);
         }else{
-            $link_model = new Link();
-            $link_model->user_id = $user->id;
+            $link_model           = new Link();
+            $link_model->user_id  = $user->id;
         }
 
         // save title if exist
         if($request->has('title'))
-            $link_model->title = $request->title;
+            $link_model->title    = $request->title;
 
         // save link if exist
         if($request->has('link_url'))
@@ -35,17 +35,22 @@ class LinkController extends Controller
 
         // i assume 0- deactivate 1- activate
         if($request->has('active'))
-            $link_model->active = $request->active;
+            $link_model->active   = $request->active;
 
         // save file if exist
         if($request->hasFile('link_image')){
-            $image = $request->file('link_image');
-            $file_name = time() . uniqid() . '.' . $image->getClientOriginalExtension();
+            $image                = $request->file('link_image');
+            $file_name            = time() . uniqid() . '.' . $image->getClientOriginalExtension();
             $image->storeAs('public', $file_name);
-            $link_model->photo = $file_name;
+            $link_model->photo    = $file_name;
         }
         $link_model->save();
-        return response(json_encode(['status' => 200, 'message' => 'Details Has been saved']));
+        $response_msg             = ['status' => 200, 'message' => 'Details Has been saved'];
+        if(empty($link_id)){
+            $new_save             = ['link_id' => $link_model->_id];
+            $response_msg         = array_merge($response_msg, $new_save);
+        }
+        return response(json_encode($response_msg));
     }
 
     public function linkUserLinks(Request $request){
