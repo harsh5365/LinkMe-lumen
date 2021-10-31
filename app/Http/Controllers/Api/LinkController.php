@@ -45,11 +45,11 @@ class LinkController extends Controller
             $link_model->photo    = $file_name;
         }
         $link_model->save();
-        $response_msg             = ['status' => 200, 'message' => 'Details Has been saved'];
-        if(empty($link_id)){
-            $new_save             = ['link_id' => $link_model->_id];
+        $response_msg             = ['status' => 200, 'message' => 'Details Has been saved', 'link_id' => $link_model->_id, 'link_image' => $link_model->photo];
+        /* if(empty($link_id)){
+            $new_save             = [];
             $response_msg         = array_merge($response_msg, $new_save);
-        }
+        } */
         return response(json_encode($response_msg));
     }
 
@@ -87,5 +87,18 @@ class LinkController extends Controller
             }
         }
         return response()->json(['status' => 200, 'message' => 'links are sorted successfully']);
+    }
+
+    public function showPublicLinks(Request $request){
+        $username    = $request->username;
+        $user        = User::where('username', $username)->first();
+        if(!empty($user)){
+            $allLinks = Link::where('user_id', $user->id)
+            ->where('active', 1)
+            ->orderBy('sort_order')->get();
+            return response(json_encode(['links' => $allLinks]));
+        }else{
+            return response(json_encode(['status' => 200, 'message' => 'user not found']));
+        }
     }
 }

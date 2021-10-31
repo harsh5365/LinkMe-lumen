@@ -25,6 +25,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 	$router->post('/password/reset', ['as' => 'password.reset', 'uses' => 'Api\UserController@reset']);
 	$router->get('/verify_account', 'Api\UserController@verifyAccount');
 	$router->get('verify_mail_resend', 'Api\UserController@resendVerifyEmail');
+    $router->get('show_public_links', 'Api\LinkController@showPublicLinks');
 
 	$router->group(['middleware' => 'auth:api'], function () use ($router) {
 		$router->post('change_password', 'Api\UserController@changePassword');
