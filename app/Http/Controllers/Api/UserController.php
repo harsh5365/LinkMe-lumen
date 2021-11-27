@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use MongoDB\Operation\Update;
 
 class UserController extends Controller
 {
@@ -43,7 +44,7 @@ class UserController extends Controller
         {
             return response(['errors'=>$validator->errors()->all()], 422);
         }
-        $check_existing = User::where('email', $email)->orWhere('username', $request->username)->first();
+        $check_existing = $this->checkUsingEmailOrUserName(['email' => $email, 'username' => $request->username]);
         if(!empty($check_existing)){
             $msg = '';
             if($check_existing->username == $request->username)
@@ -53,13 +54,14 @@ class UserController extends Controller
             return response()->json(['status' => 200, 'message' => $msg]);
         }
         $user = User::create([
-            'username' => $request->username,
-            'email' => $email,
-            'password' => Hash::make($request->password),
-            'active'   => 0,
+            'username'       => $request->username,
+            'email'          => $email,
+            'password'       => Hash::make($request->password),
+            'active'         => 0,
             'verify_account' => Str::random(10),
-            'first_login' => 1,
-            'user_type_id' => 2 // normal users
+            'first_login'    => 1,
+            'user_type_id'   => 2, // normal users
+            'is_deleted'     => 0
         ]);
 
         // $token = $user->createToken('LinkMe')->accessToken;
@@ -86,7 +88,7 @@ class UserController extends Controller
         {
             return response(['errors'=>$validator->errors()->all()], 422);
         }
-        $user = User::where('email', $email)->first();
+        $user = User::where('email', $email)->where('is_deleted', 0)->first();
         if ($user) {
             if (Hash::check($request->password, $user->password) && isset($user->active) && !empty($user->active)) {
                 $token = $user->createToken(env('APP_NAME'))->accessToken;
@@ -200,8 +202,28 @@ class UserController extends Controller
         if ($validator->fails()) {
             $arr = array("status" => 400, "message" => $validator->errors()->first());
         }else{
-            $update->name = $request->name;
-            $update->categories = $request->categories;
+            // validate email and username
+            $check_email = $this->checkUsingEmailOrUserName(['email' => $request->email, 'username' => $request->username]);
+            if (!empty($check_email) && $check_email->_id === $update->_id) {
+                $arr = array("status" => 400, "message" => 'Email Or username Already exists');
+                return json_encode($arr);
+            }
+
+            if($request->filled('name')){
+                $update->name = $request->name;
+            }
+            if($request->filled('categories')){
+                $update->categories = $request->categories;
+            }
+            if($request->filled('email')){
+                $update->email = $request->email;
+            }
+            if($request->filled('username')){
+                $update->username = $request->username;
+            }
+            if($request->filled('is_deleted')){
+                $update->is_deleted = $request->is_deleted;
+            }
             $update->first_login = 0;
             $update->save();
             $arr = array("status" => 200, "message" => 'information Saved');
@@ -238,5 +260,19 @@ class UserController extends Controller
         $return_data["site_title"]     = "Error Log";
         $return_data['page_condition'] = '';
         return view('error_log', $return_data);
+    }
+
+    public function checkUsingEmailOrUserName(array $params){
+        $email    = ((isset($params['email'])) ? $params['email'] : '');
+        $username = ((isset($params['username'])) ? $params['username'] : '');
+
+        $getUser = User::where('email', $email)
+            ->when((isset($email) && !empty($email)), function ($query) use ($email) {
+                return $query->where('email', $email);
+            })
+            ->when((isset($username) && !empty($username)), function ($query) use ($username) {
+                return $query->orWhere('username', $username);
+            })->first();
+        return $getUser;
     }
 }
