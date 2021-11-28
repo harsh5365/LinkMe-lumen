@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\EarlyAccess;
 use App\Models\User;
 use App\Notifications\CommonNotification;
 use App\Traits\ResetsPasswords;
@@ -326,5 +327,23 @@ class UserController extends Controller
             $arr = array("status" => 200, "message" => 'User Not found');
         }
         return json_encode($arr);
+    }
+
+    public function addToEarlyAccess(Request $request){
+        $validator = Validator::make($request->input(), [
+            'email'  => 'required|email'
+        ],
+        [
+            'email.required' => 'Email must not be Empty',
+            'email.email'    => 'Email is invalid'
+        ]);
+        if ($validator->fails()) {
+            return response(['errors' => $validator->errors()->all()], 422);
+        }
+        $earlyBird = new EarlyAccess();
+        $earlyBird->name = trim($request->name);
+        $earlyBird->email = $request->email;
+        $earlyBird->save();
+        return json_encode(array("status" => 200, "message" => 'information Saved'));
     }
 }
