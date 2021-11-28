@@ -153,7 +153,7 @@ class UserController extends Controller
 
     public function verifyAccount(Request $request)
     {
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->where('is_deleted', 0)->first();
         if (!empty($user)) {
             if ($user->verify_account == $request->verify_token) {
                 $user->unset('verify_account');
@@ -170,7 +170,7 @@ class UserController extends Controller
 
     public function resendVerifyEmail(Request $request)
     {
-        $user = User::where('email', $request->email)->where('active', 0)->first();
+        $user = User::where('email', $request->email)->where('active', 0)->where('is_deleted', 0)->first();
         if (!empty($user)) {
             $this->sendVerifyEmail($user);
             return response()->json(['message' => 'Mail has been sent.'], 200);
@@ -279,14 +279,14 @@ class UserController extends Controller
             })
             ->when((isset($username) && !empty($username)), function ($query) use ($username) {
                 return $query->orWhere('username', $username);
-            })->first();
+            })->where('is_deleted', 0)->first();
         return $getUser;
     }
 
     public function saveProfile(Request $request)
     {
         $username    = $request->username;
-        $user        = User::where('username', $username)->first();
+        $user        = User::where('username', $username)->where('is_deleted', 0)->first();
         if (!empty($user)) {
             $validator = Validator::make($request->input(), [
                 'profile_name'  => 'min:3|max:20',

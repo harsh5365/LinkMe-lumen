@@ -17,7 +17,7 @@ class LinkController extends Controller
         // common saving code
         $link_id                  = $request->link_id;
         $username                 = $request->username;
-        $user                     = User::where('username', $username)->first();
+        $user                     = User::where('username', $username)->where('is_deleted', 0)->first();
         if(!empty($link_id)){
             $link_model           = Link::find($link_id);
         }else{
@@ -55,7 +55,7 @@ class LinkController extends Controller
 
     public function linkUserLinks(Request $request){
         $username    = $request->username;
-        $user        = User::where('username', $username)->first();
+        $user        = User::where('username', $username)->where('is_deleted', 0)->first();
         if(!empty($user)){
             $allLinks = Link::where('user_id', $user->id)
             ->orderBy('sort_order')->get();
@@ -68,7 +68,7 @@ class LinkController extends Controller
     public function deleteLink(Request $request){
         $link_id     = $request->link_id;
         $username    = $request->username;
-        $user        = User::where('username', $username)->first();
+        $user        = User::where('username', $username)->where('is_deleted', 0)->first();
         if(!empty($user)){
             $delete_success = Link::where('_id', $link_id)->where('user_id', $user->id)->delete();
             return response(json_encode(['status' => 200, 'message' => (($delete_success)? 'link deleted successfully': 'something went wrong')]));
@@ -91,7 +91,7 @@ class LinkController extends Controller
 
     public function showPublicLinks(Request $request){
         $username    = $request->username;
-        $user        = User::where('username', $username)->first();
+        $user        = User::where('username', $username)->where('is_deleted', 0)->first();
         if(!empty($user)){
             $allLinks = Link::where('user_id', $user->id)
             ->where('active', 1)
