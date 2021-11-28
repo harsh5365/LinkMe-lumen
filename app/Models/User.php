@@ -24,7 +24,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'active', 'verify_account', 'first_login', 'user_type_id', 'username', 'is_deleted'
+        'name', 'email', 'password', 'active', 'verify_account', 'first_login', 'user_type_id', 'username', 'profile_name', 'bio', 'cover_image', 'profile_image', 'is_deleted'
     ];
 
     /**
@@ -35,4 +35,14 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     protected $hidden = [
         'password', 'remember_token'
     ];
+
+    public function saveUserDetails(User $user, array $modelParams){
+        $saveUser = $user;
+        foreach ($this->fillable as $key => $fillable) {
+            if(isset($modelParams[$fillable])){
+                $saveUser->{$fillable} = $modelParams[$fillable];
+            }
+        }
+        $saveUser->save();
+    }
 }

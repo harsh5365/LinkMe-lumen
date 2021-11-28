@@ -40,16 +40,15 @@ class UserController extends Controller
             'email' => 'required|email',
             'password' => 'required|min:6'
         ]);
-        if ($validator->fails())
-        {
-            return response(['errors'=>$validator->errors()->all()], 422);
+        if ($validator->fails()) {
+            return response(['errors' => $validator->errors()->all()], 422);
         }
         $check_existing = $this->checkUsingEmailOrUserName(['email' => $email, 'username' => $request->username]);
-        if(!empty($check_existing)){
+        if (!empty($check_existing)) {
             $msg = '';
-            if($check_existing->username == $request->username)
+            if ($check_existing->username == $request->username)
                 $msg = 'username already exists';
-            if($check_existing->email == $email)
+            if ($check_existing->email == $email)
                 $msg = 'email already exists';
             return response()->json(['status' => 200, 'message' => $msg]);
         }
@@ -84,18 +83,17 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255',
             'password' => 'required|string|min:6',
         ]);
-        if ($validator->fails())
-        {
-            return response(['errors'=>$validator->errors()->all()], 422);
+        if ($validator->fails()) {
+            return response(['errors' => $validator->errors()->all()], 422);
         }
         $user = User::where('email', $email)->where('is_deleted', 0)->first();
         if ($user) {
             if (Hash::check($request->password, $user->password) && isset($user->active) && !empty($user->active)) {
                 $token = $user->createToken(env('APP_NAME'))->accessToken;
-                $first_login = (isset($user->first_login))? $user->first_login : 0;
+                $first_login = (isset($user->first_login)) ? $user->first_login : 0;
                 $response = ['token' => $token, 'first_login' => $first_login, 'username' => $user->username];
                 return response($response, 200);
-            } else if(!isset($user->active) || empty($user->active)){
+            } else if (!isset($user->active) || empty($user->active)) {
                 $response = ["message" => "Your Account is Not Active Yet."];
                 return response($response, 422);
             } else {
@@ -103,7 +101,7 @@ class UserController extends Controller
                 return response($response, 422);
             }
         } else {
-            $response = ["message" =>'User does not exist'];
+            $response = ["message" => 'User does not exist'];
             return response($response, 422);
         }
     }
@@ -122,13 +120,14 @@ class UserController extends Controller
     {
         if (Auth::check()) {
             Auth::user()->token()->revoke();
-            return response()->json(['success' =>'logout_success'],200);
-        }else{
-            return response()->json(['error' =>'api.something_went_wrong'], 500);
+            return response()->json(['success' => 'logout_success'], 200);
+        } else {
+            return response()->json(['error' => 'api.something_went_wrong'], 500);
         }
     }
 
-    public function changePassword(Request $request){
+    public function changePassword(Request $request)
+    {
         $userid = auth()->user()->id;
         $input = $request->input();
         $rules = array(
@@ -152,36 +151,39 @@ class UserController extends Controller
         return $arr;
     }
 
-    public function verifyAccount(Request $request){
+    public function verifyAccount(Request $request)
+    {
         $user = User::where('email', $request->email)->first();
-        if(!empty($user)){
-            if($user->verify_account == $request->verify_token){
+        if (!empty($user)) {
+            if ($user->verify_account == $request->verify_token) {
                 $user->unset('verify_account');
                 $user->active = 1;
                 $user->save();
-                return response()->json(['message' =>'Account Activated Successfully.', 'activation_status'=> $user->active],200);
-            }else{
-                return response()->json(['message' =>'Code mismatch please try again.', 'activation_status'=> $user->active],200);
+                return response()->json(['message' => 'Account Activated Successfully.', 'activation_status' => $user->active], 200);
+            } else {
+                return response()->json(['message' => 'Code mismatch please try again.', 'activation_status' => $user->active], 200);
             }
-        }else{
-            return response()->json(['message' =>'No user found.'],200);
+        } else {
+            return response()->json(['message' => 'No user found.'], 200);
         }
     }
 
-    public function resendVerifyEmail(Request $request){
+    public function resendVerifyEmail(Request $request)
+    {
         $user = User::where('email', $request->email)->where('active', 0)->first();
-        if(!empty($user)){
+        if (!empty($user)) {
             $this->sendVerifyEmail($user);
-            return response()->json(['message' =>'Mail has been sent.'],200);
-        }else{
-            return response()->json(['message' =>'No user found.'],200);
+            return response()->json(['message' => 'Mail has been sent.'], 200);
+        } else {
+            return response()->json(['message' => 'No user found.'], 200);
         }
     }
 
-    public function sendVerifyEmail(object $user){
+    public function sendVerifyEmail(object $user)
+    {
         $notify = [
             'email_subject'     => 'Account Activation',
-            'introduction_line' => "Thank you for registering on ". env('APP_NAME') .'.',
+            'introduction_line' => "Thank you for registering on " . env('APP_NAME') . '.',
             'email_text'        => 'You need to activate your account in order to use our service. please click link we sent on your email address.',
             'action_text'       => 'Activate Your Account',
             'action_url'        => env('FRONT_END_LINK', 'http://localhost:3100/') . 'user/verify_account?email=' . $user->email . '&verify_token=' . $user->verify_account,
@@ -191,17 +193,18 @@ class UserController extends Controller
         return true;
     }
 
-    public function setupUser(Request $request){
+    public function setupUser(Request $request)
+    {
         $input = $request->input();
         $rules = array(
             'name' => 'required|min:3',
         );
         $update = User::find(auth()->user()->id);
-        $arr =[];
+        $arr = [];
         $validator = Validator::make($input, $rules);
         if ($validator->fails()) {
             $arr = array("status" => 400, "message" => $validator->errors()->first());
-        }else{
+        } else {
             // validate email and username
             $check_email = $this->checkUsingEmailOrUserName(['email' => $request->email, 'username' => $request->username]);
             if (!empty($check_email) && $check_email->_id === $update->_id) {
@@ -209,19 +212,19 @@ class UserController extends Controller
                 return json_encode($arr);
             }
 
-            if($request->filled('name')){
+            if ($request->filled('name')) {
                 $update->name = $request->name;
             }
-            if($request->filled('categories')){
+            if ($request->filled('categories')) {
                 $update->categories = $request->categories;
             }
-            if($request->filled('email')){
+            if ($request->filled('email')) {
                 $update->email = $request->email;
             }
-            if($request->filled('username')){
+            if ($request->filled('username')) {
                 $update->username = $request->username;
             }
-            if($request->filled('is_deleted')){
+            if ($request->filled('is_deleted')) {
                 $update->is_deleted = $request->is_deleted;
             }
             $update->first_login = 0;
@@ -231,12 +234,14 @@ class UserController extends Controller
         return json_encode($arr);
     }
 
-    public function getCategories(Request $request){
+    public function getCategories(Request $request)
+    {
         $categories = Category::get();
         return json_encode(['status' => 200, 'categories' => $categories]);
     }
 
-    public function migration(Request $request){
+    public function migration(Request $request)
+    {
         $users = User::get();
         foreach ($users as $key => $user) {
             Log::info($user);
@@ -248,13 +253,14 @@ class UserController extends Controller
         }
     }
 
-    public function indexerror(Request $request){
+    public function indexerror(Request $request)
+    {
         $return_data = array();
-        if($request->filled('indate'))
+        if ($request->filled('indate'))
             $indate = $request->indate;
         else
             $indate = date("Y-m-d");
-        $filedata = File::get(storage_path().'/logs/lumen-' . $indate . '.log');
+        $filedata = File::get(storage_path() . '/logs/lumen-' . $indate . '.log');
         $return_data["indate"]         = $indate;
         $return_data["filedata"]       = "<xmp>" . $filedata . "</xmp>";
         $return_data["site_title"]     = "Error Log";
@@ -262,7 +268,8 @@ class UserController extends Controller
         return view('error_log', $return_data);
     }
 
-    public function checkUsingEmailOrUserName(array $params){
+    public function checkUsingEmailOrUserName(array $params)
+    {
         $email    = ((isset($params['email'])) ? $params['email'] : '');
         $username = ((isset($params['username'])) ? $params['username'] : '');
 
@@ -274,5 +281,50 @@ class UserController extends Controller
                 return $query->orWhere('username', $username);
             })->first();
         return $getUser;
+    }
+
+    public function saveProfile(Request $request)
+    {
+        $username    = $request->username;
+        $user        = User::where('username', $username)->first();
+        if (!empty($user)) {
+            $validator = Validator::make($request->input(), [
+                'profile_name'  => 'min:3|max:20',
+                'bio'           => 'max:120',
+                'cover_image'   => 'mimes:jpg,jpeg,png',
+                'profile_image' => 'mimes:jpg,jpeg,png'
+            ],
+            [
+                'profile_name.min' => 'Profile name length must be greater than 3 characters.',
+                'profile_name.max' => 'Profile name length must be less than 20 characters.',
+                'bio.max'   => 'Profile bio can\'t be more than 120 characters Long.',
+                'cover_image' => 'Must be Image file',
+                'profile_image' => 'Must be Image file',
+            ]);
+            if ($validator->fails()) {
+                return response(['errors' => $validator->errors()->all()], 422);
+            }
+
+            $save_params = $request->input();
+            // save user files
+            if ($request->hasFile('cover_image')) {
+                $image                      = $request->file('cover_image');
+                $cover_image                  = time() . uniqid() . '.' . $image->getClientOriginalExtension();
+                $image->storeAs('public', $cover_image);
+                $save_params['cover_image'] = $cover_image;
+            }
+            if ($request->hasFile('profile_image')) {
+                $image                      = $request->file('profile_image');
+                $profile_image                  = time() . uniqid() . '.' . $image->getClientOriginalExtension();
+                $image->storeAs('public', $profile_image);
+                $save_params['profile_image'] = $profile_image;
+            }
+            $usrobj = new User();
+            $usrobj->saveUserDetails($user, $save_params);
+            $arr = array("status" => 200, "message" => 'information Saved');
+        } else {
+            $arr = array("status" => 200, "message" => 'User Not found');
+        }
+        return json_encode($arr);
     }
 }
