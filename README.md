@@ -129,6 +129,9 @@ main url: https://dev.welovecoders.com/api
         response: {
             // if username is invalid
             "message" : "user not found"
+
+            <!-- else -->
+            "links": [{link object}, {link object}, ..] //this will be in sorted order and active links
         }
     },
 
@@ -176,7 +179,7 @@ main url: https://dev.welovecoders.com/api
         request parameters: {
         },
         response: {
-            <!-- will return current user object as mentioned in database -->
+            "user" : "{will return current user object as mentioned in database}"
         }
     },
 
@@ -245,4 +248,81 @@ main url: https://dev.welovecoders.com/api
         }
     },
 
+    // api to get profession categories.
+    {
+        route: "/getCategories",
+        method: "get",
+        request parameters: {
+        },
+        response: {
+            "categories" : [{categories object}, {categories object}, ...]
+        }
+    },
+
+    // api to delete link.
+    {
+        route: "/delete_link",
+        method: "get",
+        request parameters: {
+            "link_id" : "_jhvfdsvkjfdvfd"
+            "username" : "pradhu"
+        },
+        response: {
+            <!-- if user not found -->
+            "message": "user not found" 
+
+            <!-- link exist -->
+            "message" : "link deleted successfully"
+
+            <!-- else -->
+            "message" : "something went wrong"
+        }
+    },
+
+    // api to save link information.
+    {
+        route: "/save_link",
+        method: "post",
+        request parameters: {
+            "link_id" : "_fajdsvjadsk", // pass if want to edit link
+            "username" : "pradhu", // unique username
+            "title" : "Google",
+            "link_url" : "https://www.google.com",
+            "active" : "1", // 0- inactive 1 - active
+            "link_image" : // pass file here
+        },
+        response: {
+            "message" : "Details Has been saved",
+            "link_id" : "_fajdsvjadsk",
+            "link_image" : "photo url"
+        }
+    },
+
+    // list user links.
+    {
+        route: "/list_links",
+        method: "get",
+        request parameters: {
+            "username" : "username", // unique username
+        },
+        response: {
+            <!-- if user not found -->
+            "message": "user not found" 
+
+            <!-- else -->
+            "links": [{link object}, {link object}, ..] //this will be in sorted order
+        }
+    },
+
+    // sort user links.
+    {
+        route: "/sort_links",
+        method: "post",
+        request parameters: {
+            "link_ids" : "["_bhdsabcdsabc", "_nacjsdbcj"], //in short array of link ids
+        },
+        response: {
+            "message": "links are sorted successfully" 
+        }
+    },
 ]
