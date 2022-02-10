@@ -119,7 +119,7 @@ main url: https://dev.welovecoders.com/api
         }
     },
 
-    // if in some case, user want to resend verification token or not received any, thsn need to use this
+    // show user links
     {
         route: "/show_public_links",
         method: "get",
@@ -131,4 +131,118 @@ main url: https://dev.welovecoders.com/api
             "message" : "user not found"
         }
     },
+
+    // add users to waiting list to use our product
+    {
+        route: "/early_access",
+        method: "post",
+        request parameters: {
+            "name" : "Harsh Bhatt", //not required from db but need to pass
+            "email" : "bhattharsh610@gmail.com"
+        },
+        response: {
+            "message" : "information Saved"
+        }
+    },
+
+    // change user password
+    {
+        route: "/change_password",
+        method: "post",
+        request parameters: {
+            "old_password" : "Harsh123",
+            "new_password" : "Azova123",
+            "confirm_password" : "Azova123"
+        },
+        response: {
+            <!-- if validation failes -->
+            "message" : "validation error messages"
+
+            <!-- old password is wrong -->
+            "message" : "Check your old password."
+
+            <!-- new password is same as old password -->
+            "message" : "Please enter a password which is not similar then current password."
+
+            <!-- else -->
+            "message" : "Password updated successfully."
+        }
+    },
+
+    // get current login user details
+    {
+        route: "/user",
+        method: "get",
+        request parameters: {
+        },
+        response: {
+            <!-- will return current user object as mentioned in database -->
+        }
+    },
+
+    // logout current user
+    {
+        route: "/logout",
+        method: "post",
+        request parameters: {
+        },
+        response: {
+            "success": "logout_success"
+        }
+    },
+
+    // api to save basic user information
+    {
+        route: "/setup_user",
+        method: "post",
+        request parameters: {
+            "name" : "Pradhyuman", // required
+            "categories" : ['art', 'web app', 'law'], //optional
+            "email" : "pradhyuman@gmail.com", //optional
+            "username" : "pradhu", //optional
+            "is_deleted" : "0", //optional 1 - to delete user
+            "email" : "pradhyuman@gmail.com", //optional
+        },
+        response: {
+            <!-- validation error -->
+            "message": "name must not be empty || name must be atleat 3 characters"
+
+            <!-- if we have passed email or username already in our database -->
+            "message": "Email Or username Already exists"
+
+            <!-- else -->
+            "message" : "information Saved"
+        }
+    },
+
+    // save user profile information
+    {
+        route: "/profile",
+        method: "post",
+        request parameters: {
+            "profile_name" : "prdPaas" // min 3 characters max 20 characters
+            "bio" : "this is having limit of 120 characters"
+            "cover_image" : //pass file here mimes:jpg,jpeg,png
+            "profile_image" : //pass file here mimes:jpg,jpeg,png
+        },
+        response: {
+            <!-- validation error -->
+            "message": "respective validation error messages" 
+            /* 
+            [
+                "Profile name length must be greater than 3 characters.",
+                "Profile name length must be less than 20 characters.",
+                "Profile bio can't be more than 120 characters Long.",
+                "Must be Image file"
+            ]
+            */
+
+            <!-- if user not found -->
+            "message": "user not found" 
+
+            <!-- else -->
+            "message": "information Saved" 
+        }
+    },
+
 ]
